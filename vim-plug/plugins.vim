@@ -20,7 +20,7 @@ nnoremap <F2> :set invpaste paste?<CR>
 imap <F2> <C-O>:set invpaste paste?<CR>
 set pastetoggle=<F2>
 " Uncomment below to set the max textwidth. Use a value corresponding to the width of your screen.
-" set textwidth=79
+set textwidth=100
 set formatoptions=tcqrn1
 set tabstop=2
 set shiftwidth=2
@@ -77,10 +77,11 @@ vnoremap <Space> zf
 
 " Automatically save and load folds
 autocmd BufWinLeave *.* mkview
-autocmd BufWinEnter *.* silent loadview"
+autocmd BufWinEnter *.* silent loadview
 
 call plug#begin('~/.config/nvim/autoload/plugged')
 " Shorthand notation; fetches https://github.com/junegunn/vim-easy-align
+" Gruvbox is a retro color scheme for vim: https://github.com/morhetz/gruvbox
 Plug 'morhetz/gruvbox'
 Plug 'junegunn/vim-easy-align'
 Plug 'honza/vim-snippets'
@@ -97,6 +98,7 @@ Plug 'KeitaNakamura/tex-conceal.vim'
 " various color schemes (neovim default is 'dark'; I like 'slate' with dark background)
 " http://vimcolors.com/
 
+" Check what these plugins do. Seem to be color related
 Plug 'freeo/vim-kalisi'
 Plug 'w0ng/vim-hybrid'
 Plug 'dylanaraps/wal'
@@ -116,10 +118,11 @@ else
   Plug 'roxma/nvim-yarp'
   Plug 'roxma/vim-hug-neovim-rpc'
 endif
-
+" Jedi autocompletion
 Plug 'davidhalter/jedi-vim'
 call plug#end()
-" key bindings
+
+" Global variables 
 let g:tex_flavor='latex'
 let g:vimtex_view_method='skim'
 let g:vimtex_quickfix_mode=0
@@ -129,17 +132,17 @@ let g:UltiSnipsExpandTrigger = '<tab>'
 let g:UltiSnipsJumpForwardTrigger = '<tab>'
 let g:UltiSnipsJumpBackwardTrigger = '<s-tab>'
 let g:livepreview_previewer = 'open -a Preview'
-autocmd FileType tex nmap <buffer> <C-T> :!latexmk -pdf %<CR>
+
+" Auto commands
 autocmd Filetype tex setl updatetime=1
 " Auto start NERD tree when opening a directory
 autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | wincmd p | endif
 map <silent> <C-n> :NERDTreeFocus<CR>
 " Auto start NERD tree if no files are specified
 autocmd StdinReadPre * let s:std_in=1
-autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | exe 'NERDTree' | endif
 
 " Let quit work as expected if after entering :q the only window left open is NERD Tree itself
-autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+" autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 
 " disable mesy latex indentations
 autocmd FileType tex setlocal shiftwidth=0 
@@ -181,7 +184,6 @@ elseif has('win32')
 
 endif
 
-let g:tex_flavor = "latex"
 let g:vimtex_quickfix_open_on_warning = 0
 let g:vimtex_quickfix_mode = 2
 
@@ -212,6 +214,21 @@ let g:vimtex_quickfix_latexlog = {
             \   'titlesec' : 1,
             \ },
             \}
+
+" Customization of vimtex-latexmk compiler. See h: vimtex_compiler_latexmk
+let g:vimtex_compiler_latexmk = {
+        \ 'build_dir' : 'build',
+        \ 'callback' : 1,
+        \ 'continuous' : 1,
+        \ 'executable' : 'latexmk',
+        \ 'hooks' : [],
+        \ 'options' : [
+        \   '-verbose',
+        \   '-file-line-error',
+        \   '-synctex=1',
+        \   '-interaction=nonstopmode',
+        \ ],
+        \}
 
 " -----------------------------------------------------------------------------
 "  APPEARANCE
