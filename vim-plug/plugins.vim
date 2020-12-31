@@ -1,3 +1,4 @@
+" Set  options
 " Set compatibility to Vim only.
 set nocompatible
 
@@ -70,15 +71,16 @@ set smartcase
 
 " Store info from no more than 100 files at a time, 9999 lines of text, 100kb of data. Useful for copying large amounts of data between files.
 set viminfo='100,<9999,s100
-
+" Mappings
 " Map the <Space> key to toggle a selected fold opened/closed.
 nnoremap <silent> <Space> @=(foldlevel('.')?'za':"\<Space>")<CR>
 vnoremap <Space> zf
-
+"
 " Automatically save and load folds
 autocmd BufWinLeave *.* mkview
 autocmd BufWinEnter *.* silent loadview
 
+" Plugins
 call plug#begin('~/.config/nvim/autoload/plugged')
 " Shorthand notation; fetches https://github.com/junegunn/vim-easy-align
 " Gruvbox is a retro color scheme for vim: https://github.com/morhetz/gruvbox
@@ -94,6 +96,13 @@ Plug 'honza/vim-snippets'
 Plug 'lervag/vimtex'
 Plug 'SirVer/ultisnips'
 Plug 'jalvesaq/Nvim-R'
+"NERDTree
+"NERDTree is a popular plugin to display an interactive file tree view in a side panel, which can be useful when working in larger project.
+Plug 'preservim/nerdtree'
+" Fuzzy file search tool
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+Plug 'airblade/vim-rooter'
 Plug 'KeitaNakamura/tex-conceal.vim'
 " various color schemes (neovim default is 'dark'; I like 'slate' with dark background)
 " http://vimcolors.com/
@@ -147,6 +156,37 @@ autocmd StdinReadPre * let s:std_in=1
 " disable mesy latex indentations
 autocmd FileType tex setlocal shiftwidth=0 
 
+" -----------------------------------------------------------------------------
+"  FZF  OPTIONS
+"  ----------------------------------------------------------------------------
+" This is the default option:
+"   - Preview window on the right with 50% width
+"   - CTRL-/ will toggle preview window.
+" - Note that this array is passed as arguments to fzf#vim#with_preview function.
+" - To learn more about preview window options, see `--preview-window` section of `man fzf`.
+let g:fzf_preview_window = ['right:50%', 'ctrl-/']
+
+" Preview window on the upper side of the window with 40% height,
+" hidden by default, ctrl-/ to toggle
+let g:fzf_preview_window = ['up:40%:hidden', 'ctrl-/']
+
+" Empty value to disable preview window altogether
+let g:fzf_preview_window = []
+
+" [Buffers] Jump to the existing window if possible
+let g:fzf_buffers_jump = 1
+
+" [[B]Commits] Customize the options used by 'git log':
+let g:fzf_commits_log_options = '--graph --color=always --format="%C(auto)%h%d %s %C(black)%C(bold)%cr"'
+
+" [Tags] Command to generate tags file
+let g:fzf_tags_command = 'ctags -R'
+
+" [Commands] --expect expression for directly executing the command
+let g:fzf_commands_expect = 'alt-enter,ctrl-x'
+
+" Mappings
+nmap <C-P> :FZF<CR>
 " -----------------------------------------------------------------------------
 "  VIMTEX OPTIONS
 "  ----------------------------------------------------------------------------
@@ -271,3 +311,4 @@ nnoremap <C-f> : silent exec '!inkscape-figures edit "'.b:vimtex.root.'/figures/
 hi Conceal ctermbg=none
 " Mappings for incfigures
 
+"Powerline
