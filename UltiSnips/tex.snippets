@@ -84,6 +84,10 @@ snippet =< "implied by" Ai
 endsnippet
 
 context "math()"
+snippet phi "phi" iA
+\phi
+endsnippet
+context "math()"
 snippet iff "iff" Ai
 \iff
 endsnippet
@@ -112,6 +116,16 @@ endsnippet
 
 snippet // "Fraction" iA
 \\frac{$1}{$2}$0
+endsnippet
+
+context "math()"
+snippet hh "Half" iA
+\\frac{$1}{2}$0
+endsnippet
+
+context "math()"
+snippet pr "Paranthesis" iA
+($1)$0
 endsnippet
 
 context "math()"
@@ -242,6 +256,7 @@ endsnippet
 snippet lim "limit" w
 \lim_{${1:n} \to ${2:\infty}} 
 endsnippet
+
 
 snippet limsup "limsup" w
 \limsup_{${1:n} \to ${2:\infty}} 
@@ -464,6 +479,17 @@ context "math()"
 snippet \\\ "setminus" iA
 \setminus
 endsnippet
+
+context "math()"
+snippet pp "Plus"  iA
++
+endsnippet
+
+context "math()"
+snippet mm "Minus" iA
+-
+endsnippet
+
 
 snippet >> ">>" iA
 \gg

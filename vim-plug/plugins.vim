@@ -87,7 +87,11 @@ call plug#begin('~/.config/nvim/autoload/plugged')
 Plug 'morhetz/gruvbox'
 Plug 'junegunn/vim-easy-align'
 Plug 'honza/vim-snippets'
-    " Better Syntax Support
+"Rainbow brackets
+Plug 'frazrepo/vim-rainbow'
+"Status bar
+Plug 'itchyny/lightline.vim'
+" Better Syntax Support
     Plug 'sheerun/vim-polyglot'
     " File Explorer
     Plug 'scrooloose/nerdtree'
