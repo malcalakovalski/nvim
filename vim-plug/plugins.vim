@@ -2,16 +2,32 @@
 " Set compatibility to Vim only.
 set nocompatible
 
+"Show line numbers
+set number
+
+" Set relative number by default 
+set relativenumber
 " Helps force plug-ins to load correctly when it is turned back on below.
 filetype off
 
 " Turn on syntax highlighting.
 syntax on
 
-" For plug-ins to load correctly.
+" Enable highlight search 
+set hlsearch 
+set incsearch 
+" Quickly source .vimrc
+nnoremap <leader>r :source $MYVIMRC<CR>
+" Quickly open .vimrc in new tab
+nnoremap <leader>v :tabedit ~/.config/vim-plug/plugins.vim<CR>
+"For plug-ins to load correctly.
 filetype plugin indent on
 
+setlocal spell
+set spelllang=en_us
+"inroemap <C-l> <c-g>u<Esc>[siz=`]a<c-g>u
 " Turn off modelines
+
 set modelines=0
 
 " Automatically wrap text that extends beyond the screen length.
@@ -66,6 +82,8 @@ set hlsearch
 set incsearch
 " Include matching uppercase words with lowercase search term
 set ignorecase
+"Disable matching
+let g:AutoPairs = ''
 " Include only uppercase words with uppercase search term
 set smartcase
 
@@ -82,11 +100,21 @@ autocmd BufWinEnter *.* silent loadview
 
 " Plugins
 call plug#begin('~/.config/nvim/autoload/plugged')
-" Shorthand notation; fetches https://github.com/junegunn/vim-easy-align
+" Surround quotes
+Plug 'tpope/vim-surround'
+"Vim comments
+Plug 'tpope/vim-commentary'
+"Shorthand notation; fetches https://github.com/junegunn/vim-easy-align
 " Gruvbox is a retro color scheme for vim: https://github.com/morhetz/gruvbox
+" Auto completion
+"Plug 'ycm-core/YouCompleteMe', { 'do': 'python3 install.py --clang-completer --rust-completer' }
+"Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'morhetz/gruvbox'
 Plug 'junegunn/vim-easy-align'
+"Linting
+Plug 'dense-analysis/ale'
 Plug 'honza/vim-snippets'
+Plug 'SirVer/ultisnips'
 "Rainbow brackets
 Plug 'frazrepo/vim-rainbow'
 "Status bar
@@ -98,11 +126,10 @@ Plug 'itchyny/lightline.vim'
     " Auto pairs for '(' '[' '{'
     Plug 'jiangmiao/auto-pairs'
 Plug 'lervag/vimtex'
-Plug 'SirVer/ultisnips'
 Plug 'jalvesaq/Nvim-R'
 "NERDTree
 "NERDTree is a popular plugin to display an interactive file tree view in a side panel, which can be useful when working in larger project.
-Plug 'preservim/nerdtree'
+"Plug 'preservim/nerdtree'
 " Fuzzy file search tool
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
@@ -133,6 +160,7 @@ else
 endif
 " Jedi autocompletion
 Plug 'davidhalter/jedi-vim'
+Plug '907th/vim-auto-save'
 call plug#end()
 
 " Global variables 
@@ -145,17 +173,23 @@ let g:UltiSnipsExpandTrigger = '<tab>'
 let g:UltiSnipsJumpForwardTrigger = '<tab>'
 let g:UltiSnipsJumpBackwardTrigger = '<s-tab>'
 let g:livepreview_previewer = 'open -a Preview'
+" Setup the compile rule for pdf to use pdflatex with synctex enabled
 
 " Auto commands
-autocmd Filetype tex setl updatetime=1
+"autocmd Filetype tex setl updatetime=1
 " Auto start NERD tree when opening a directory
-autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | wincmd p | endif
-map <silent> <C-n> :NERDTreeFocus<CR>
-" Auto start NERD tree if no files are specified
-autocmd StdinReadPre * let s:std_in=1
+"autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists("s:std_in") | exe 'NERDTree' argv()[0] | wincmd p | ene | wincmd p | endif
+
+"nnoremap <leader>n :NERDTreeFocus<CR>
+"nnoremap <C-n> :NERDTree<CR>
+"nnoremap <C-t> :NERDTreeToggle<CR>
+"nnoremap <C-f> :NERDTreeFind<CR>
+"Auto start NERD tree if no files are specified
+"autocmd StdinReadPre * let s:std_in=1
 
 " Let quit work as expected if after entering :q the only window left open is NERD Tree itself
-" autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+"autocmd VimEnter * NERDTree
+"autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 
 " disable mesy latex indentations
 autocmd FileType tex setlocal shiftwidth=0 
@@ -194,48 +228,37 @@ nmap <C-P> :FZF<CR>
 " -----------------------------------------------------------------------------
 "  VIMTEX OPTIONS
 "  ----------------------------------------------------------------------------
-if has('unix')
-    if has('mac')
-        let g:vimtex_view_method = "skim"
-        let g:vimtex_view_general_viewer
-                \ = '/Applications/Skim.app/Contents/SharedSupport/displayline'
-        let g:vimtex_view_general_options = '-r @line @pdf @tex'
-
-        " This adds a callback hook that updates Skim after compilation
-        let g:vimtex_compiler_callback_hooks = ['UpdateSkim']
-        function! UpdateSkim(status)
-            if !a:status | return | endif
-
-            let l:out = b:vimtex.out()
-            let l:tex = expand('%:p')
-            let l:cmd = [g:vimex_view_general_viewer, '-r']
-            if !empty(system('pgrep Skim'))
-            call extend(l:cmd, ['-g'])
-            endif
-            if has('nvim')
-            call jobstart(l:cmd + [line('.'), l:out, l:tex])
-            elseif has('job')
-            call job_start(l:cmd + [line('.'), l:out, l:tex])
-            else
-            call system(join(l:cmd + [line('.'), shellescape(l:out), shellescape(l:tex)], ' '))
-            endif
-        endfunction
-    else
-        let g:latex_view_general_viewer = "zathura"
-        let g:vimtex_view_method = "zathura"
-    endif
-elseif has('win32')
-
-endif
-
+let g:vimtex_view_general_viewer
+        \ = "/Applications/Skim.app/Contents/SharedSupport/displayline -r " 
+let g:vimtex_view_general_options = '-r @line @pdf @tex'
 let g:vimtex_quickfix_open_on_warning = 0
 let g:vimtex_quickfix_mode = 2
+augroup vimtex_compilation
+  au!
+    au User VimtexEventCompileSuccess call UpdateSkim()
+augroup END
 
+function! UpdateSkim()
+    let l:out = b:vimtex.out()
+    let l:tex = expand('%:p')
+    let l:cmd = [g:vimtex_view_general_viewer, '-r']
+    if !empty(system('pgrep Skim'))
+    call extend(l:cmd, ['-g'])
+    endif
+    if has('nvim')
+    call jobstart(l:cmd + [line('.'), l:out, l:tex])
+    elseif has('job')
+    call job_start(l:cmd + [line('.'), l:out, l:tex])
+    else
+    call system(join(l:cmd + [line('.'), shellescape(l:out), shellescape(l:tex)], ' '))
+    endif
+endfunction
+let g:vimtex_compiler_progname = 'nvr'
 " One of the neosnippet plugins will conceal symbols in LaTeX which is
 " confusing
-let g:tex_conceal = ""
 set conceallevel=1
 let g:tex_conceal='abdmg'
+hi Conceal ctermbg=none
 " Can hide specifc warning messages from the quickfix window
 " Quickfix with Neovim is broken or something
 " https://github.com/lervag/vimtex/issues/773
@@ -267,13 +290,18 @@ let g:vimtex_compiler_latexmk = {
         \ 'executable' : 'latexmk',
         \ 'hooks' : [],
         \ 'options' : [
+        \   '-xelatex',
         \   '-verbose',
         \   '-file-line-error',
         \   '-synctex=1',
         \   '-interaction=nonstopmode',
         \ ],
         \}
-
+filetype plugin on
+autocmd FileType tex set makeprg=rubber\ --inplace\ --maxerr\ 1\ \ --pdf\ --short\ --quiet\ --force\ %
+autocmd FileType tex nmap <buffer> <C-T> :!latexmk -pdf %<CR>
+autocmd FileType tex nmap <buffer> T :!open -a Skim %<.pdf %<.pdf<CR><CR>
+autocmd FileType tex nmap <buffer> C :!rubber --clean<CR>
 " -----------------------------------------------------------------------------
 "  APPEARANCE
 "  ----------------------------------------------------------------------------
@@ -284,25 +312,6 @@ let g:onedark_termcolors=16
 " colorscheme flattened_darkt
 " This is new style
 
-function! UpdateSkim(status)
-    if !a:status | return | endif
-
-    let l:out = b:vimtex.out()
-    let l:tex = expand('%:p')
-    let l:cmd = [g:vimtex_view_general_viewer, '-r']
-
-    if !empty(system('pgrep Skim'))
-        call extend(l:cmd, ['-g'])
-    endif
-
-    if has('nvim')
-        call jobstart(l:cmd + [line('.'), l:out, l:tex])
-    elseif has('job')
-        call job_start(l:cmd + [line('.'), l:out, l:tex])
-    else
-        call system(join(l:cmd + [line('.'), shellescape(l:out), shellescape(l:tex)], ' '))
-    endif
-endfunction
 let mapleader = "/"
 autocmd FileType tex nmap <buffer> <C-T> :!xelatex %<CR>
 autocmd FileType tex nmap <buffer> T :!open -a Skim %:r.pdf<CR><CR>
@@ -316,3 +325,71 @@ hi Conceal ctermbg=none
 " Mappings for incfigures
 
 "Powerline
+"
+"Splits
+nnoremap <C-J> <C-W><C-J>
+nnoremap <C-K> <C-W><C-K>
+nnoremap <C-L> <C-W><C-L>
+nnoremap <C-H> <C-W><C-H>
+
+" Open new split panes to right and bottom, which feels more natural
+set splitbelow
+set splitright
+
+"Function
+fun! GoYCM()
+    nnoremap <buffer> <silent> <leader>gd :YcmCompleter GoTo<CR>
+    nnoremap <buffer> <silent> <leader>gr :YcmCompleter GoToReferences<CR>
+    nnoremap <buffer> <silent> <leader>rr :YcmCompleter RefactorRename<space>
+endfun
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+fun! GoCoc()
+    inoremap <buffer> <silent><expr> <TAB>
+                \ pumvisible() ? "\<C-n>" :
+                \ <SID>check_back_space() ? "\<TAB>" :
+                \ coc#refresh()
+    inoremap <buffer><expr> <S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+    inoremap <buffer> <silent><expr> <c-space> coc#refresh()
+
+
+    " GoTo code navigation 
+    nmap <buffer> <leader>gd <Plug>(coc-definition)
+    nmap <buffer> <leader>gy <Plug>(coc-type-definition)
+    nmap <buffer> <leader>gi <Plug>(coc-implementation)
+    nmap <buffer><Plug>gr <Plug>(coc-references)
+    nnoremap <buffer> <leader>cr :CocRestart
+endfun
+" Change default target to pdf, if not dvi is used
+let g:Tex_DefaultTargetFormat = 'pdf'
+ 
+" Setup the compile rule for pdf to use pdflatex with synctex enabled
+let g:Tex_CompileRule_pdf = 'pdflatex -synctex=1 --interaction=nonstopmode $*' 
+ 
+" PDF display rule
+let g:Tex_ViewRule_pdf = 'open -a Skim'
+map /ls :w<CR>:silent !/Applications/Skim.app/Contents/SharedSupport/displayline -r <C-r>=line('.')<CR> %<.pdf<CR><CR>
+map /lv <leader>lv
+
+"Make j and k move to the next row, not the next line
+nnoremap j gj
+nnoremap k gk
+" Home & End should be placed next to each other 
+nnoremap - $
+" Move to beggining/end of line
+nnoremap B ^
+nnoremap E $
+
+" Quick save
+nnoremap <S-s> :w<CR>
+"autocmd BufWritePre * :call TrimWhitespace()
+"autocmd FileType typescript :call GoYCM()
+"autocmd FileType py :call GoCoc()
+"
+    let g:auto_save_events = ["InsertLeave", "TextChanged"]   
+    autocmd FileType tex let g:auto_save = 1
+    autocmd FileType tex let g:auto_save_silent = 1

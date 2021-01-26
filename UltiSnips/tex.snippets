@@ -10,12 +10,12 @@ def env(name):
     return x != '0' and x != '0'
 endglobal
 
-snippet template "Basic template" b
+snippet template "Basic template" bA
 \documentclass[a4paper]{article}
 % !TEX program = XeLaTeX+shell-escape
 \input{preamble.tex}
 \DeclareMathOperator{\Res}{Res}
-\title{}
+\title{$1}
 \begin{document}
 	\maketitle
 	$0
@@ -31,6 +31,38 @@ endsnippet
 priority 100
 snippet ... "ldots" iA
 \ldots
+endsnippet
+
+context "math()"
+snippet yp "y particular solution" iA
+y_{p}(t)
+endsnippet
+
+context "math()"
+snippet yc "y complementary solution" iA
+y_{c}(t)
+endsnippet
+
+# Shorthand for time derivative
+context "math()"
+snippet dot "dot"
+	\\dot{{$1}} {$0}
+endsnippet
+# Shorthand for second order time derivative
+context "math()"
+snippet ddot "ddot"
+	\\ddot{{$1}} {$0}
+endsnippet
+
+context "math()"
+snippet ydots "ydots" iA
+y_1,y_2, \ldots, y_{n}
+endsnippet
+
+
+context "math()"
+snippet xdots "xdots" iA
+x_1,x_2, \ldots, x_{n}
 endsnippet
 
 snippet table "Table environment" b
@@ -71,7 +103,7 @@ snippet desc "Description" b
 \end{description}
 endsnippet
 
-snippet pac "Package" b
+snippet pac "Package" bA
 \usepackage[${1:options}]{${2:package}}$0
 endsnippet
 
@@ -81,6 +113,38 @@ endsnippet
 
 snippet =< "implied by" Ai
 \impliedby
+endsnippet
+
+context "math()"
+snippet aa "alpha" iA
+\alpha
+endsnippet
+
+context "math()"
+snippet bb "beta" iA
+\beta
+endsnippet
+
+context "math()"
+snippet dd "delta" iA
+\delta
+endsnippet
+
+context "math()"
+snippet e "exponential" iA
+e^{$1}$0
+endsnippet
+context "math()"
+snippet can "cancel" iA
+\cancel{$1}$0
+endsnippet
+context "math()"
+snippet bcan "bcancel" iA
+\bcancel{$1}$0
+endsnippet
+context "math()" 
+snippet ww "omega" iA
+\omega
 endsnippet
 
 context "math()"
@@ -185,7 +249,7 @@ snippet == "equals" iA
 &= $1 \\\\
 endsnippet
 
-snippet != "equals" iA
+snippet != "notequals" iA
 \neq 
 endsnippet
 
@@ -246,7 +310,7 @@ snippet conj "conjugate" iA
 endsnippet
 
 snippet sum "sum" w
-\sum_{k=${1:1}}^{${2:\infty}} ${3:a_n z^n}
+\sum_{n=${1:1}}^{${2:\infty}} ${3:a_n x^n}
 endsnippet
 
 snippet taylor "taylor" w
@@ -343,6 +407,15 @@ y_{i}
 endsnippet
 
 context "math()"
+snippet ycc "yc" iA
+y_{c}$0
+endsnippet 
+
+context "math()"
+snippet ypp "yp" iA
+y_{p}$0
+endsnippet 
+context "math()"
 snippet xjj "xj" iA
 x_{j}
 endsnippet
@@ -355,6 +428,12 @@ endsnippet
 context "math()"
 snippet xp1 "x" iA
 x_{n+1}
+endsnippet
+
+
+context "math()"
+snippet ap1 "a" iA
+a_{n+1}
 endsnippet
 
 context "math()"
@@ -486,7 +565,7 @@ snippet pp "Plus"  iA
 endsnippet
 
 context "math()"
-snippet mm "Minus" iA
+snippet mm "Minus" b
 -
 endsnippet
 
@@ -501,7 +580,7 @@ endsnippet
 
 
 snippet ~~ "~" iA
-\sim 
+\approx
 endsnippet
 
 context "math()"
@@ -510,7 +589,7 @@ snippet set "set" wA
 endsnippet
 
 snippet || "mid" iA
- \mid 
+\mid 
 endsnippet
 
 
@@ -641,5 +720,41 @@ snippet DD "D" iA
 \mathbb{D}
 endsnippet
 
+snippet exercise "Exercise" b
+\section{Exercise \S$1 \#$2}
+endsnippet
+global !p
+
+# Define matrix size in terms of rows/columns
+def mat(snip):
+	rows = snip.buffer[snip.line].split('x')[0]
+	cols = snip.buffer[snip.line].split('x')[1]
+
+	int_val = lambda string: int(''.join(s for s in string if s.isdigit()))
+	
+	r = int_val(rows)
+	c = int_val(cols)
+
+	offset = c + 1
+	old_spacing = snip.buffer[snip.line][:snip.buffer[snip.line].rfind('\t') + 1]
+	
+	snip.buffer[snip.line] = ''
+	
+	final_str = old_spacing + "\\begin{matrix}\n"
+
+	for i in range(r):
+		final_str += old_spacing + '\t'
+		final_str += " & ".join(['$' + str(i * c + j + offset) for j in range(c)])
+		final_str += " \\\\\\\n"
+	final_str += old_spacing + "\\end{matrix}\n$0"
+
+	snip.expand_anon(final_str)
+endglobal
+
+# Function that lets you specificy an nxm matrix
+
+pre_expand "mat(snip)"
+snippet "fmat(\d+)x(\d+)" "Add matrix" r
+endsnippet
 # vim:ft=snippets
 
